@@ -66,7 +66,7 @@ struct MagicImage
 				candDiffSum = curScore;
 				offsetCand = offsetX;
 			}
-			if(curScore < 0.05 * this->height * 256) {
+			if(curScore < 0.13 * this->height * 256) {
 				return offsetX;
 			}
 		}

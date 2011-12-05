@@ -7,11 +7,13 @@
 
 int main()
 {
-#	include "testimage.h"
+//#	include "testimage.h"
+#	include "magiceye3.h"
 	std::unique_ptr<uint8_t[]> data(new uint8_t[width * height * 4]);
+	auto *pdata = header_data;
 	for(unsigned int i = 0; i < width * height;i ++) {
 		uint8_t *ptr = data.get() + i*4;
-		HEADER_PIXEL(header_data, ptr);
+		HEADER_PIXEL(pdata, ptr);
 	}
 	MagicImage a(width,height,width*4,PixelFormat::X8R8G8B8,data.get());
 
@@ -31,29 +33,35 @@ int main()
 
 	for(unsigned int i = 0; i < height ;i ++) {
 		const uint8_t *curLine = &a.imageData[i*a.stride];
-		for(int j = 0; j < (int)(width) - magicOffset - 4 + 1; j ++) {
-			int minDiff = std::numeric_limits<int>::max();
-			int relX = 0;
-			for(int l = 0; l < magicOffset && j/magicOffset*magicOffset+magicOffset+l+3 < width; l ++) {
-				int curDiff = 0;
-				for(int k = 0;k < 4; k ++) {
-					curDiff += llabs((long long)curLine[(j+k)*4 + 0] - (long long)curLine[(j/magicOffset*magicOffset+magicOffset+l+k)*4 + 0]);
-					curDiff += llabs((long long)curLine[(j+k)*4 + 1] - (long long)curLine[(j/magicOffset*magicOffset+magicOffset+l+k)*4 + 1]);
-					curDiff += llabs((long long)curLine[(j+k)*4 + 2] - (long long)curLine[(j/magicOffset*magicOffset+magicOffset+l+k)*4 + 2]);
+		for(int j = 0; j < (int)(width) - magicOffset; j ++) {
+			for(int C = 6 ; C >= 1; C --) {
+				double minDiff = std::numeric_limits<double>::max();
+				int relX = 0;
+				for(int l = j + (magicOffset)*2/3; l < j + magicOffset * 1.3; l ++) {
+					if(l + C >= width) break;
+					int curDiff = 0;
+					for(int k = 0;k < C; k ++) {
+						curDiff += llabs((long long)curLine[(j+k)*4 + 0] - (long long)curLine[(l+k)*4 + 0]);
+						curDiff += llabs((long long)curLine[(j+k)*4 + 1] - (long long)curLine[(l+k)*4 + 1]);
+						curDiff += llabs((long long)curLine[(j+k)*4 + 2] - (long long)curLine[(l+k)*4 + 2]);
+					}
+					if(minDiff > curDiff + C*abs(l-j-magicOffset) / magicOffset) {
+						minDiff = curDiff + C*abs(l-j-magicOffset) / magicOffset;
+						relX = l-j-magicOffset;
+					}
 				}
-				if(minDiff > curDiff) {
-					minDiff = curDiff;
-					relX = j % magicOffset - l;
+				if(minDiff < C*3) {
+					result[i*(width-magicOffset)+j] = relX;
+					minRelX = std::min(minRelX, relX);
+					maxRelX = std::max(maxRelX, relX);
+					break;
 				}
 			}
-			result[i*(width-magicOffset)+j] = relX;
-			minRelX = std::min(minRelX, relX);
-			maxRelX = std::max(maxRelX, relX);
 		}
 	}
 	if(maxRelX == minRelX) maxRelX ++;
 	for(unsigned int i = 0;i < height;i ++) {
-		for(int j = 0; j < (int)(width) - magicOffset - 4 + 1; j++) {
+		for(int j = 0; j < (int)(width) - magicOffset; j++) {
 			output[(i*(width-magicOffset)+j)*4+0] = 
 			output[(i*(width-magicOffset)+j)*4+1] = 
 			output[(i*(width-magicOffset)+j)*4+2] = (result[i*(width-magicOffset)+j] - minRelX) * 255 / (maxRelX - minRelX);

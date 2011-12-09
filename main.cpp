@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2011, ChanMin Kim (kcm1700@gmail.com)
+ *
+ * This files is licensed under a Creative Commons license:
+ * http://creativecommons.org/licenses/by-nc-sa/3.0/
+ */
 #include <stdio.h>
 #include <functional>
 #include "MagicImage.h"
@@ -9,16 +15,15 @@ int dt[1024][1024][2];
 
 int main()
 {
-//#	include "testimage.h"
-//#	include "magiceye3.h"
-#	include "magiceyeshark.h"
+	/*
+	TODO: make a raw image here.
 	std::unique_ptr<BYTE[]> data(new BYTE[width * height * 4]);
 	auto *pdata = header_data;
 	for(unsigned int i = 0; i < width * height;i ++) {
 		BYTE *ptr = data.get() + i*4;
 		HEADER_PIXEL(pdata, ptr);
 	}
-
+	*/
 	Image a(width,height,width*4,PixelFormat::X8R8G8B8,data.get());
 
 	int magicOffset = MagicDecoder::GetMagicOffset(&a);

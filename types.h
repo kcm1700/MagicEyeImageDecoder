@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2011, ChanMin Kim (kcm1700@gmail.com)
+ *
+ * This files is licensed under a Creative Commons license:
+ * http://creativecommons.org/licenses/by-nc-sa/3.0/
+ */
+
 #ifndef _TYPES_H__
 #define _TYPES_H__
 #include <cstdint>
